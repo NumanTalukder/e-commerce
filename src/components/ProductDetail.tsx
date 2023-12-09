@@ -2,12 +2,14 @@
 
 import { cartProductType, selectedImgType } from '@/utils/types'
 import { Rating } from '@mui/material'
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import SetColor from './Products/SetColor'
 import SetQuantity from './Products/SetQuantity'
 import Button from './Products/Button'
 import ProductImage from './Products/ProductImage'
 import { useCart } from '@/hooks/useCart'
+import { MdCheckCircle } from 'react-icons/md'
+import { useRouter } from 'next/navigation'
 
 interface ProductDetailProps {
   product: any
@@ -19,6 +21,7 @@ const Horizontal = () => {
 
 const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
   const { handleAddProductToCart, cartProducts } = useCart()
+  const [isProductInCart, setIsProductInCart] = useState(false)
   const [cartProduct, setCartProduct] = useState<cartProductType>({
     id: product.id,
     name: product.name,
@@ -29,6 +32,22 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
     qty: 1,
     price: product.price,
   })
+
+  const router = useRouter()
+
+  useEffect(() => {
+    setIsProductInCart(false)
+
+    if (cartProduct) {
+      const existingIndex = cartProducts?.findIndex(
+        (item) => item.id === product.id
+      )
+
+      if (existingIndex > -1) {
+        setIsProductInCart(true)
+      }
+    }
+  }, [cartProducts])
 
   console.log(cartProducts)
 
@@ -92,26 +111,44 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
           {product.inStock ? 'In Stock' : 'Out of stock'}
         </div>
         <Horizontal />
-        <SetColor
-          images={product.images}
-          cartProduct={cartProduct}
-          handleColorSelect={handleColorSelect}
-        />
-        <Horizontal />
-        <SetQuantity
-          cartProduct={cartProduct}
-          handleQtyIncrease={handleQtyIncrease}
-          handleQtyDecrease={handleQtyDecrease}
-        />
-        <Horizontal />
-        <div className='max-w-[300px]'>
-          <Button
-            label='Add To Cart'
-            onClick={() => handleAddProductToCart(cartProduct)}
-          />
-        </div>
+        {isProductInCart ? (
+          <>
+            <p className='mb-2 text-slate-500 flex items-center gap-1'>
+              <MdCheckCircle size={24} className='text-teal-400' />
+              <span>Product added to cart</span>
+            </p>
+            <div className='max-w-[300px]'>
+              <Button
+                label='View Cart'
+                outline
+                onClick={() => router.push('/cart')}
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <SetColor
+              images={product.images}
+              cartProduct={cartProduct}
+              handleColorSelect={handleColorSelect}
+            />
+            <Horizontal />
+            <SetQuantity
+              cartProduct={cartProduct}
+              handleQtyIncrease={handleQtyIncrease}
+              handleQtyDecrease={handleQtyDecrease}
+            />
+            <Horizontal />
+            <div className='max-w-[300px]'>
+              <Button
+                label='Add To Cart'
+                onClick={() => handleAddProductToCart(cartProduct)}
+              />
+            </div>
 
-        <Horizontal />
+            <Horizontal />
+          </>
+        )}
       </div>
     </div>
   )
