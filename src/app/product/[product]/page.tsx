@@ -1,14 +1,15 @@
+'use client'
+
 import Container from '@/components/Container'
-import { product } from '@/utils/product'
 import ProductDetail from '@/components/ProductDetail'
 import ListRating from '@/components/Products/ListRating'
+import { products } from '@/utils/products'
+import { useParams } from 'next/navigation'
 
-interface iParams {
-  params: string
-}
+const Product = () => {
+  const params = useParams()
 
-const Product = ({ params }: { params: iParams }) => {
-  console.log(params)
+  const product = products.find((item) => item.id === params.product)
 
   return (
     <div>
